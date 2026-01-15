@@ -9,9 +9,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/big1111111/distributed-inventory-system/internal/api"
-	"github.com/big1111111/distributed-inventory-system/internal/repository"
-	"github.com/big1111111/distributed-inventory-system/internal/service"
+	"github.com/bhnrathore/distributed-inventory-system/internal/api"
+	"github.com/bhnrathore/distributed-inventory-system/internal/repository"
+	"github.com/bhnrathore/distributed-inventory-system/internal/service"
 )
 
 func main() {
