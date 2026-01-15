@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"github.com/big1111111/distributed-inventory-system/internal/domain"
+	"github.com/bhnrathore/distributed-inventory-system/internal/domain"
 )
 
 // ProductRepository defines the interface for product data operations

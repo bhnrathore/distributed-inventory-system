@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/big1111111/distributed-inventory-system/internal/domain"
-	"github.com/big1111111/distributed-inventory-system/internal/repository"
+	"github.com/bhnrathore/distributed-inventory-system/internal/domain"
+	"github.com/bhnrathore/distributed-inventory-system/internal/repository"
 )
 
 // MockProductRepository implements ProductRepository interface for testing

@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/big1111111/distributed-inventory-system/internal/domain"
-	"github.com/big1111111/distributed-inventory-system/internal/service"
+	"github.com/bhnrathore/distributed-inventory-system/internal/domain"
+	"github.com/bhnrathore/distributed-inventory-system/internal/service"
 )
 
 // Handler holds references to services

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/big1111111/distributed-inventory-system/internal/domain"
+	"github.com/bhnrathore/distributed-inventory-system/internal/domain"
 	"github.com/google/uuid"
 )
 

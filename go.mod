@@ -1,4 +1,4 @@
-module github.com/big1111111/distributed-inventory-system
+module github.com/bhnrathore/distributed-inventory-system
 
 go 1.25.5
 

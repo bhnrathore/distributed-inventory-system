@@ -1,6 +1,6 @@
 # Distributed Inventory System
 
-[![CI](https://github.com/big1111111/distributed-inventory-system/actions/workflows/ci.yml/badge.svg)](https://github.com/big1111111/distributed-inventory-system/actions)
+[![CI](https://github.com/bhnrathore/distributed-inventory-system/actions/workflows/ci.yml/badge.svg)](https://github.com/bhnrathore/distributed-inventory-system/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Go Version](https://img.shields.io/badge/Go-1.25.5-blue)](https://golang.org)
 
