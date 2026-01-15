@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/bhnrathore/distributed-inventory-system/internal/domain"
-	"github.com/bhnrathore/distributed-inventory-system/internal/repository"
 )
 
 // MockProductRepository implements ProductRepository interface for testing
@@ -356,5 +355,281 @@ func TestInsufficientStockRemoval(t *testing.T) {
 	err := service.RemoveStock(ctx, product.ID, 20, "ORDER-001")
 	if err == nil {
 		t.Fatal("Expected error for insufficient stock")
+	}
+}
+func TestReleaseReservedStock(t *testing.T) {
+	productRepo := NewMockProductRepository()
+	inventoryRepo := NewMockInventoryRepository()
+	transactionRepo := NewMockTransactionRepository()
+
+	service := NewInventoryService(productRepo, inventoryRepo, transactionRepo)
+	ctx := context.Background()
+
+	product := &domain.Product{
+		ID:          "prod-1",
+		Name:        "Laptop",
+		SKU:         "LAP001",
+		Description: "Gaming Laptop",
+		Price:       1500.00,
+	}
+	productRepo.Create(ctx, product)
+
+	inventory := &domain.InventoryItem{
+		ID:        "inv-1",
+		ProductID: product.ID,
+		Quantity:  50,
+		Reserved:  20,
+		Location:  "Warehouse A",
+	}
+	inventoryRepo.Create(ctx, inventory)
+
+	err := service.UnreserveStock(ctx, product.ID, 20, "ORDER-001")
+	if err != nil {
+		t.Fatalf("Failed to unreserve stock: %v", err)
+	}
+
+	updated, _ := inventoryRepo.GetByProductID(ctx, product.ID)
+	if updated.Reserved != 0 {
+		t.Errorf("Expected reserved 0, got %d", updated.Reserved)
+	}
+}
+
+func TestInsufficientReservedStock(t *testing.T) {
+	productRepo := NewMockProductRepository()
+	inventoryRepo := NewMockInventoryRepository()
+	transactionRepo := NewMockTransactionRepository()
+
+	service := NewInventoryService(productRepo, inventoryRepo, transactionRepo)
+	ctx := context.Background()
+
+	product := &domain.Product{
+		ID:          "prod-1",
+		Name:        "Laptop",
+		SKU:         "LAP001",
+		Description: "Gaming Laptop",
+		Price:       1500.00,
+	}
+	productRepo.Create(ctx, product)
+
+	inventory := &domain.InventoryItem{
+		ID:        "inv-1",
+		ProductID: product.ID,
+		Quantity:  50,
+		Reserved:  5,
+		Location:  "Warehouse A",
+	}
+	inventoryRepo.Create(ctx, inventory)
+
+	err := service.UnreserveStock(ctx, product.ID, 20, "ORDER-001")
+	if err == nil {
+		t.Fatal("Expected error for insufficient reserved stock")
+	}
+}
+
+func TestGetProductWithInventory(t *testing.T) {
+	productRepo := NewMockProductRepository()
+	inventoryRepo := NewMockInventoryRepository()
+	transactionRepo := NewMockTransactionRepository()
+
+	service := NewInventoryService(productRepo, inventoryRepo, transactionRepo)
+	ctx := context.Background()
+
+	product := &domain.Product{
+		ID:          "prod-1",
+		Name:        "Laptop",
+		SKU:         "LAP001",
+		Description: "Gaming Laptop",
+		Price:       1500.00,
+	}
+	productRepo.Create(ctx, product)
+
+	inventory := &domain.InventoryItem{
+		ID:        "inv-1",
+		ProductID: product.ID,
+		Quantity:  50,
+		Reserved:  10,
+		Location:  "Warehouse A",
+	}
+	inventoryRepo.Create(ctx, inventory)
+
+	productResult, inventoryResult, err := service.GetProduct(ctx, product.ID)
+	if err != nil {
+		t.Fatalf("Failed to get product: %v", err)
+	}
+
+	if productResult == nil {
+		t.Fatal("Expected non-nil product")
+	}
+
+	if inventoryResult == nil {
+		t.Fatal("Expected non-nil inventory")
+	}
+}
+
+func TestGetProductNotFound(t *testing.T) {
+	productRepo := NewMockProductRepository()
+	inventoryRepo := NewMockInventoryRepository()
+	transactionRepo := NewMockTransactionRepository()
+
+	service := NewInventoryService(productRepo, inventoryRepo, transactionRepo)
+	ctx := context.Background()
+
+	productResult, inventoryResult, _ := service.GetProduct(ctx, "non-existent")
+	if productResult != nil || inventoryResult != nil {
+		t.Fatal("Expected nil for non-existent product")
+	}
+}
+
+func TestCreateProductWithInvalidData(t *testing.T) {
+	productRepo := NewMockProductRepository()
+	inventoryRepo := NewMockInventoryRepository()
+	transactionRepo := NewMockTransactionRepository()
+
+	service := NewInventoryService(productRepo, inventoryRepo, transactionRepo)
+	ctx := context.Background()
+
+	product := &domain.Product{
+		Name:        "",
+		SKU:         "LAP001",
+		Description: "Gaming Laptop",
+		Price:       1500.00,
+	}
+
+	err := service.CreateProduct(ctx, product, "Warehouse A", 50)
+	if err == nil {
+		t.Fatal("Expected error for invalid product")
+	}
+}
+
+func TestAddStockWithInvalidQuantity(t *testing.T) {
+	productRepo := NewMockProductRepository()
+	inventoryRepo := NewMockInventoryRepository()
+	transactionRepo := NewMockTransactionRepository()
+
+	service := NewInventoryService(productRepo, inventoryRepo, transactionRepo)
+	ctx := context.Background()
+
+	product := &domain.Product{
+		ID:          "prod-1",
+		Name:        "Laptop",
+		SKU:         "LAP001",
+		Description: "Gaming Laptop",
+		Price:       1500.00,
+	}
+	productRepo.Create(ctx, product)
+
+	inventory := &domain.InventoryItem{
+		ID:        "inv-1",
+		ProductID: product.ID,
+		Quantity:  50,
+		Reserved:  0,
+		Location:  "Warehouse A",
+	}
+	inventoryRepo.Create(ctx, inventory)
+
+	err := service.AddStock(ctx, product.ID, -10, "PO-001")
+	if err == nil {
+		t.Fatal("Expected error for negative quantity")
+	}
+}
+
+func TestReleaseReservedStockWithInvalidQuantity(t *testing.T) {
+	productRepo := NewMockProductRepository()
+	inventoryRepo := NewMockInventoryRepository()
+	transactionRepo := NewMockTransactionRepository()
+
+	service := NewInventoryService(productRepo, inventoryRepo, transactionRepo)
+	ctx := context.Background()
+
+	product := &domain.Product{
+		ID:          "prod-1",
+		Name:        "Laptop",
+		SKU:         "LAP001",
+		Description: "Gaming Laptop",
+		Price:       1500.00,
+	}
+	productRepo.Create(ctx, product)
+
+	inventory := &domain.InventoryItem{
+		ID:        "inv-1",
+		ProductID: product.ID,
+		Quantity:  50,
+		Reserved:  10,
+		Location:  "Warehouse A",
+	}
+	inventoryRepo.Create(ctx, inventory)
+
+	err := service.UnreserveStock(ctx, product.ID, -5, "ORDER-001")
+	if err == nil {
+		t.Fatal("Expected error for negative quantity")
+	}
+}
+
+func TestListProducts(t *testing.T) {
+	productRepo := NewMockProductRepository()
+	inventoryRepo := NewMockInventoryRepository()
+	transactionRepo := NewMockTransactionRepository()
+
+	service := NewInventoryService(productRepo, inventoryRepo, transactionRepo)
+	ctx := context.Background()
+
+	// Create multiple products
+	for i := 1; i <= 3; i++ {
+		num := string(rune('0' + i))
+		product := &domain.Product{
+			Name:        "Product " + num,
+			SKU:         "SKU00" + num,
+			Description: "Test Product",
+			Price:       float64(i * 100),
+		}
+		productRepo.Create(ctx, product)
+	}
+
+	products, err := service.ListProducts(ctx, 10, 0)
+	if err != nil {
+		t.Fatalf("Failed to list products: %v", err)
+	}
+
+	if len(products) < 3 {
+		t.Logf("Expected at least 3 products, got %d", len(products))
+	}
+}
+
+func TestListTransactions(t *testing.T) {
+	productRepo := NewMockProductRepository()
+	inventoryRepo := NewMockInventoryRepository()
+	transactionRepo := NewMockTransactionRepository()
+
+	service := NewInventoryService(productRepo, inventoryRepo, transactionRepo)
+	ctx := context.Background()
+
+	product := &domain.Product{
+		ID:          "prod-1",
+		Name:        "Laptop",
+		SKU:         "LAP001",
+		Description: "Gaming Laptop",
+		Price:       1500.00,
+	}
+	productRepo.Create(ctx, product)
+
+	inventory := &domain.InventoryItem{
+		ID:        "inv-1",
+		ProductID: product.ID,
+		Quantity:  50,
+		Reserved:  0,
+		Location:  "Warehouse A",
+	}
+	inventoryRepo.Create(ctx, inventory)
+
+	// Add stock which creates a transaction
+	_ = service.AddStock(ctx, product.ID, 10, "PO-001")
+
+	transactions, err := service.ListTransactions(ctx, product.ID, 10, 0)
+	if err != nil {
+		t.Fatalf("Failed to list transactions: %v", err)
+	}
+
+	if len(transactions) == 0 {
+		t.Fatal("Expected at least one transaction")
 	}
 }
